@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="220" viewBox="0 0 680 220" role="img" aria-label="vrf-ping"><title>vrf-ping</title><g transform="translate(20 25) scale(1.2)"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M20 27 L57 91 L94 27" stroke="#71869d" stroke-width="5" opacity=".5"/>
+<path d="M20 57 L57 121 L94 57" stroke="#71869d" stroke-width="5" opacity=".5"/>
+<path d="M10 42 H20 L57 106 L94 42 H113" stroke="#f0a838" stroke-width="10"/>
+</g><circle cx="113" cy="42" r="7" fill="#f0a838"/></g><text x="202" y="142" fill="#f1f3f5" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-weight="600" font-size="114" letter-spacing="-4">vrf-ping</text></svg>

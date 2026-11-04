@@ -1,5 +1,10 @@
 # vrf-ping
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/vrf-ping-logo-dark.svg">
+  <img src="docs/brand/vrf-ping-logo-light.svg" alt="vrf-ping" width="420">
+</picture>
+
 A lightweight SmokePing alternative with optional per-target VRF and source-address binding. ICMP/TCP probes, latency distributions, packet loss and history. Single Go binary, plain JSONL storage.
 
 ![vrf-ping](docs/images/vrf-ping-graph.png)

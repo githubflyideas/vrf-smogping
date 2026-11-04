@@ -51,23 +51,23 @@ async function main() {
   const versionOutput = execFileSync(binary, ['--version'], { encoding: 'utf8' }).trim();
   assert.equal(versionOutput, 'vrf-ping ' + version);
   const work = fs.mkdtempSync(path.join(scratch, 'vrf-ping-readme-'));
-  const listener = net.createServer(socket => {
+  const targetNames = ['lab-edge-01', 'lab-edge-02', 'lab-core-01', 'lab-core-02', 'lab-app-01', 'lab-app-02'];
+  const listeners = targetNames.map(() => net.createServer(socket => {
     // Probe clients close immediately after connect; resets are normal here.
     socket.on('error', () => {});
     socket.end();
-  });
+  }));
   const reservation = net.createServer();
   let backend, browser, exitPromise;
   const errors = [], blocked = new Set();
   try {
-    const probePort = await listen(listener);
+    const probePorts = await Promise.all(listeners.map(listen));
     const webPort = await listen(reservation);
     await close(reservation);
     fs.mkdirSync(path.join(work, 'targets'));
     fs.writeFileSync(path.join(work, 'targets/ping.list'), '');
-    const name = 'Loopback lab TCP';
-    const targetLine = `127.0.0.1:${probePort} ${name} interval=1 source=127.0.0.1`;
-    fs.writeFileSync(path.join(work, 'targets/tcp.list'), targetLine + '\n');
+    const targetLines = targetNames.map((name, i) => `127.0.0.1:${probePorts[i]} ${name} interval=1 source=127.0.0.1`);
+    fs.writeFileSync(path.join(work, 'targets/tcp.list'), targetLines.join('\n') + '\n');
     const started = Date.now();
     backend = spawn(binary, ['--listen', `127.0.0.1:${webPort}`], { cwd: work, stdio: ['ignore', 'ignore', 'ignore'] });
     exitPromise = once(backend, 'exit');
@@ -91,7 +91,21 @@ async function main() {
     await page.goto(origin, { waitUntil: 'networkidle' });
     await page.locator('#ver').filter({ hasText: version }).waitFor();
     // Wait real wall time: never alter the clock, history, API, or displayed DOM.
-    await sleep(Math.max(0, started + 45000 - Date.now()));
+    await sleep(Math.max(0, started + 90000 - Date.now()));
+    await page.waitForFunction(() => !rendering);
+    assert.equal(await page.locator('#pills button').count(), targetNames.length);
+    for (const name of targetNames) assert(await page.locator('#pills button').filter({ hasText: name }).isVisible(), name);
+    await page.locator('#pills button').filter({ hasText: 'lab-edge-01' }).click();
+    await page.waitForFunction(() => !rendering);
+    const perTarget = [];
+    for (const name of targetNames) {
+      const response = await fetch(origin + '/api/series?target=' + encodeURIComponent(name) + '&minutes=5');
+      assert(response.ok);
+      const samples = await response.json();
+      assert(samples.length >= 30, name + ': too few actual rounds');
+      assert(samples.every(r => !r.error && r.s > 0 && r.r > 0 && r.t >= Math.floor(started / 1000)), name + ': invalid probe history');
+      perTarget.push({ name, rounds: samples.length, sent: samples.reduce((n,r)=>n+r.s,0), received: samples.reduce((n,r)=>n+r.r,0), seriesSha256: sha(JSON.stringify(samples)) });
+    }
     const from = new Date(Math.floor(started / 60000) * 60000).toISOString().slice(0, 16);
     const to = new Date(Math.ceil(Date.now() / 60000) * 60000).toISOString().slice(0, 16);
     await page.locator('#customFrom').fill(from);
@@ -113,21 +127,21 @@ async function main() {
     const png = fs.readFileSync(image);
     const capturedAt = new Date().toISOString();
     const evidence = {
-      schema: 1, caption: 'Loopback lab: genuine TCP measurements from a native vrf-ping 3.3.1-preview build; not a production network or Linux VRF demonstration.',
+      schema: 1, caption: 'Six-target loopback lab: genuine TCP measurements from a native vrf-ping 3.3.1-preview build; not a production network or Linux VRF demonstration.',
       capturedAt, version, versionOutput,
-      source: { revision: null, reason: 'Fresh repository without a Git revision; product-content fingerprint used instead.', ...before },
+      source: { revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), reason: 'Base revision before capture-tool edits; product-content fingerprint records the actual build inputs.', ...before },
       build: { command: '../toolchains/go/bin/go.exe build -ldflags "-X main.version=3.3.1-preview" -o <scratch>/vrf-ping-native-screenshot.exe .', args: buildArgs.map(a => a === binary ? '<scratch>/vrf-ping-native-screenshot' + path.extname(binary) : a), goVersion: execFileSync(go, ['version'], { encoding: 'utf8' }).trim(), binarySha256: sha(fs.readFileSync(binary)), platform: process.platform, architecture: process.arch },
       image: { path: 'docs/images/vrf-ping-graph.png', sha256: sha(png), width: png.readUInt32BE(16), height: png.readUInt32BE(20), fullPage: false, deviceScaleFactor: 1 },
-      fixture: { startedAt: new Date(started).toISOString(), elapsedSeconds: (Date.now() - started) / 1000, icmpTargets: [], tcpTargets: [targetLine], listener: 'Node TCP listener owned by this capture; accepts and closes real loopback connections', sourceAddress: '127.0.0.1', vrf: null, intervalSeconds: 1, history: 'Fresh scratch directory; only executable-generated measurements; no replay, seeding, or timestamp modification', authentication: 'No credentials; HTTP bound exclusively to IPv4 loopback', externalProbes: false },
-      measurements: { rounds: rounds.length, sent: rounds.reduce((n, r) => n + (r.s || 0), 0), received: rounds.reduce((n, r) => n + (r.r || 0), 0), latencySamples: rounds.reduce((n, r) => n + (r.ms || []).length, 0), firstTimestamp: rounds[0].t, lastTimestamp: rounds[rounds.length - 1].t, seriesSha256: sha(JSON.stringify(rounds)) },
-      browser: { channel: 'msedge', version: browser.version(), timezone: 'UTC', thirdPartyRequestsBlocked: true, blockedOrigins: [...blocked].sort(), javascriptErrors: errors, interaction: ['Filled native custom date inputs and clicked Go', 'Expanded native Probe routing disclosure'], domRetouching: false, mockedResponses: false }
+      fixture: { startedAt: new Date(started).toISOString(), elapsedSeconds: (Date.now() - started) / 1000, icmpTargets: [], tcpTargets: targetLines, listener: 'Six distinct Node TCP listeners owned by this capture; accept and close real loopback connections', sourceAddress: '127.0.0.1', vrf: null, intervalSeconds: 1, history: 'Fresh scratch directory; only executable-generated measurements; no replay, seeding, or timestamp modification', authentication: 'No credentials; HTTP bound exclusively to IPv4 loopback', externalProbes: false },
+      measurements: { targetCount: perTarget.length, perTarget, selectedTarget: 'lab-edge-01', rounds: rounds.length, sent: rounds.reduce((n, r) => n + (r.s || 0), 0), received: rounds.reduce((n, r) => n + (r.r || 0), 0), latencySamples: rounds.reduce((n, r) => n + (r.ms || []).length, 0), firstTimestamp: rounds[0].t, lastTimestamp: rounds[rounds.length - 1].t, seriesSha256: sha(JSON.stringify(rounds)) },
+      browser: { channel: 'msedge', version: browser.version(), timezone: 'UTC', thirdPartyRequestsBlocked: true, blockedOrigins: [...blocked].sort(), javascriptErrors: errors, interaction: ['Selected lab-edge-01 from six visible target buttons', 'Filled native custom date inputs and clicked Go', 'Expanded native Probe routing disclosure'], domRetouching: false, mockedResponses: false }
     };
     fs.writeFileSync(manifestFile, JSON.stringify(evidence, null, 2) + '\n');
     console.log(JSON.stringify({ image, manifest: manifestFile, version: versionOutput, measurements: evidence.measurements, elapsedSeconds: evidence.fixture.elapsedSeconds, sourceSha256: before.sha256, binarySha256: evidence.build.binarySha256, imageSha256: evidence.image.sha256, dimensions: [evidence.image.width, evidence.image.height] }, null, 2));
   } finally {
     if (browser) await browser.close();
     if (backend && backend.exitCode === null) { backend.kill(); await exitPromise; }
-    await close(listener);
+    await Promise.all(listeners.map(close));
     await close(reservation);
     fs.rmSync(work, { recursive: true, force: true });
     console.log('Cleanup complete: owned browser, backend and TCP listener stopped; disposable history removed.');

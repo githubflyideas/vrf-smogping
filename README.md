@@ -9,7 +9,7 @@ A lightweight SmokePing alternative with optional per-target VRF and source-addr
 
 ![vrf-ping](docs/images/vrf-ping-graph.png)
 
-*Actual UI from a native development build, measuring TCP on an isolated loopback lab.*
+*Actual UI from a native development build, measuring six TCP targets in an isolated loopback lab.*
 
 ## Install
 

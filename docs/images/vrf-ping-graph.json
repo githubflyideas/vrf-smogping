@@ -1,12 +1,12 @@
 {
   "schema": 1,
-  "caption": "Loopback lab: genuine TCP measurements from a native vrf-ping 3.3.1-preview build; not a production network or Linux VRF demonstration.",
-  "capturedAt": "2026-11-04T15:13:32.151Z",
+  "caption": "Six-target loopback lab: genuine TCP measurements from a native vrf-ping 3.3.1-preview build; not a production network or Linux VRF demonstration.",
+  "capturedAt": "2026-11-04T16:41:03.810Z",
   "version": "3.3.1-preview",
   "versionOutput": "vrf-ping 3.3.1-preview",
   "source": {
-    "revision": null,
-    "reason": "Fresh repository without a Git revision; product-content fingerprint used instead.",
+    "revision": "6fe5d0dc5812d8fe3b45d1d5a343db93f4a5d1db",
+    "reason": "Base revision before capture-tool edits; product-content fingerprint records the actual build inputs.",
     "algorithm": "SHA256 of UTF-8 JSON.stringify(files), sorted paths; individual file hashes over raw bytes",
     "sha256": "62fca51fafbb63cb8339cd5f5ac6159dd676a63efc9d0b888b7b5d83dca9fa76",
     "files": [
@@ -91,26 +91,31 @@
       "."
     ],
     "goVersion": "go version go1.22.12 windows/amd64",
-    "binarySha256": "02d71e3e3fa0f28129becce6170ea3697a0347b1841d3427608688ef3f8ac4b3",
+    "binarySha256": "08559b32fbfaf7270d07ed31d6c6784259afcc86804934dda60b9ff9ece4de7d",
     "platform": "win32",
     "architecture": "x64"
   },
   "image": {
     "path": "docs/images/vrf-ping-graph.png",
-    "sha256": "416ef1d36952b7b81eb7de4b7e572bda79939b60c6c782f09bb1c184007a472a",
+    "sha256": "f3f05d998e311e24c4c6c4ce89fd3e2b8d0d5f5c52e6bc35d86e78be583d65e5",
     "width": 1440,
     "height": 1000,
     "fullPage": false,
     "deviceScaleFactor": 1
   },
   "fixture": {
-    "startedAt": "2026-11-04T15:12:44.074Z",
-    "elapsedSeconds": 48.515,
+    "startedAt": "2026-11-04T16:39:31.787Z",
+    "elapsedSeconds": 92.298,
     "icmpTargets": [],
     "tcpTargets": [
-      "127.0.0.1:60470 Loopback lab TCP interval=1 source=127.0.0.1"
+      "127.0.0.1:59776 lab-edge-01 interval=1 source=127.0.0.1",
+      "127.0.0.1:59777 lab-edge-02 interval=1 source=127.0.0.1",
+      "127.0.0.1:59778 lab-core-01 interval=1 source=127.0.0.1",
+      "127.0.0.1:59779 lab-core-02 interval=1 source=127.0.0.1",
+      "127.0.0.1:59780 lab-app-01 interval=1 source=127.0.0.1",
+      "127.0.0.1:59781 lab-app-02 interval=1 source=127.0.0.1"
     ],
-    "listener": "Node TCP listener owned by this capture; accepts and closes real loopback connections",
+    "listener": "Six distinct Node TCP listeners owned by this capture; accept and close real loopback connections",
     "sourceAddress": "127.0.0.1",
     "vrf": null,
     "intervalSeconds": 1,
@@ -119,13 +124,59 @@
     "externalProbes": false
   },
   "measurements": {
-    "rounds": 30,
-    "sent": 600,
-    "received": 600,
-    "latencySamples": 600,
-    "firstTimestamp": 1793805164,
-    "lastTimestamp": 1793805208,
-    "seriesSha256": "6cfad4c8489ddca436555634b50b15373fd6d3fb79c15aff40111f2deafdf536"
+    "targetCount": 6,
+    "perTarget": [
+      {
+        "name": "lab-edge-01",
+        "rounds": 74,
+        "sent": 1480,
+        "received": 1480,
+        "seriesSha256": "558bce9f1c83d4ed6ba67bc3e05bd50303758192fd74e6f8689a656b3bf27338"
+      },
+      {
+        "name": "lab-edge-02",
+        "rounds": 73,
+        "sent": 1460,
+        "received": 1460,
+        "seriesSha256": "91c5f8683a82e48aa1971a4bdfe4d9d700f315518901974945871d0ddb74ee40"
+      },
+      {
+        "name": "lab-core-01",
+        "rounds": 73,
+        "sent": 1460,
+        "received": 1460,
+        "seriesSha256": "81a9e4ac0659bdd17a31e56edc34f4bb0c3e4daca54906c053064d084573949c"
+      },
+      {
+        "name": "lab-core-02",
+        "rounds": 74,
+        "sent": 1480,
+        "received": 1480,
+        "seriesSha256": "1a9021a1e18861e2886e6b80492d5516a7a93e168cbe97c6c91aaec1606e2c1f"
+      },
+      {
+        "name": "lab-app-01",
+        "rounds": 74,
+        "sent": 1480,
+        "received": 1480,
+        "seriesSha256": "b00470a2c1c562076f669b61f763011bddbba01ba38f7543eca3a9a3b4431ff7"
+      },
+      {
+        "name": "lab-app-02",
+        "rounds": 74,
+        "sent": 1480,
+        "received": 1480,
+        "seriesSha256": "28ba4aa2f3231c67ed116e88d9f7de298fec0ac3ff1decb711c580598b4d8380"
+      }
+    ],
+    "selectedTarget": "lab-edge-01",
+    "rounds": 74,
+    "sent": 1480,
+    "received": 1480,
+    "latencySamples": 1480,
+    "firstTimestamp": 1793810372,
+    "lastTimestamp": 1793810461,
+    "seriesSha256": "558bce9f1c83d4ed6ba67bc3e05bd50303758192fd74e6f8689a656b3bf27338"
   },
   "browser": {
     "channel": "msedge",
@@ -135,6 +186,7 @@
     "blockedOrigins": [],
     "javascriptErrors": [],
     "interaction": [
+      "Selected lab-edge-01 from six visible target buttons",
       "Filled native custom date inputs and clicked Go",
       "Expanded native Probe routing disclosure"
     ],

@@ -1,0 +1,84 @@
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Optional published release tag to verify downloaded binary
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      JSON_PING_TEST_MULTI_HOST: jp-multi.test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22' }
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - name: Multi-address fixture on disposable hosted runner
+        run: printf '127.0.0.2 jp-multi.test\n127.0.0.1 jp-multi.test\n' | sudo tee -a /etc/hosts
+      - run: go vet ./...
+      - run: go test -race -count=1 -v ./...
+      - name: Real Linux VRF and source-address acceptance
+        run: |
+          sudo modprobe vrf
+          go test -c -o "$RUNNER_TEMP/vrf-ping.test"
+          sudo env JSON_PING_DISPOSABLE_NETNS=1 unshare --net sh scripts/test-vrf.sh "$RUNNER_TEMP/vrf-ping.test"
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm }
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Build renamed distribution archives
+        if: ${{ !inputs.release_tag }}
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: '~> v2'
+          args: release --snapshot --clean
+      - name: Production browser and backend acceptance
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          binary_name=vrf-ping
+          if [ -n "$RELEASE_TAG" ]; then
+            assets=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')
+            if printf '%s\n' "$assets" | grep -Fxq vrf-ping-linux-amd64.tar.gz; then
+              binary_name=vrf-ping
+            elif printf '%s\n' "$assets" | grep -Fxq json-ping-linux-amd64.tar.gz; then
+              binary_name=json-ping
+            else
+              printf '%s\n' 'Release has no supported Linux amd64 archive' >&2
+              exit 1
+            fi
+            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --pattern "$binary_name-linux-amd64.tar.gz" --pattern SHA256SUMS --dir "$RUNNER_TEMP"
+          else
+            cp dist/vrf-ping-linux-amd64.tar.gz dist/SHA256SUMS "$RUNNER_TEMP/"
+          fi
+          (cd "$RUNNER_TEMP" && sha256sum --ignore-missing -c SHA256SUMS)
+          tar -xzf "$RUNNER_TEMP/$binary_name-linux-amd64.tar.gz" -C "$RUNNER_TEMP"
+          if [ -n "$RELEASE_TAG" ]; then
+            test "$("$RUNNER_TEMP/$binary_name" --version)" = "$binary_name ${RELEASE_TAG#v}"
+          else
+            "$RUNNER_TEMP/$binary_name" --version | grep '^vrf-ping '
+          fi
+          sha256sum "$RUNNER_TEMP/$binary_name"
+          JSON_PING_BINARY="$RUNNER_TEMP/$binary_name" JSON_PING_TEST_WORKDIR="$RUNNER_TEMP" npm test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !inputs.release_tag }}
+        with:
+          name: vrf-ping-candidate
+          if-no-files-found: error
+          path: |
+            dist/vrf-ping-*.tar.gz
+            dist/SHA256SUMS

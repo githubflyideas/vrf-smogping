@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "caption": "Loopback lab: genuine TCP measurements from a native vrf-ping 3.3.1-preview build; not a production network or Linux VRF demonstration.",
+  "capturedAt": "2026-11-04T15:13:32.151Z",
+  "version": "3.3.1-preview",
+  "versionOutput": "vrf-ping 3.3.1-preview",
+  "source": {
+    "revision": null,
+    "reason": "Fresh repository without a Git revision; product-content fingerprint used instead.",
+    "algorithm": "SHA256 of UTF-8 JSON.stringify(files), sorted paths; individual file hashes over raw bytes",
+    "sha256": "62fca51fafbb63cb8339cd5f5ac6159dd676a63efc9d0b888b7b5d83dca9fa76",
+    "files": [
+      {
+        "path": "config.go",
+        "sha256": "8700cdc2c6d938df69f78f38638b3ed0fa9df58e52de2294169a67d0ec153f8e"
+      },
+      {
+        "path": "detect.go",
+        "sha256": "d1f43b06a3899bafa1d3d2979a6ff08d0b824cd4ed07c97a38d418b0a9592ecb"
+      },
+      {
+        "path": "go.mod",
+        "sha256": "edd9f6b8fbc3b591e4a7fe085b2de51bd69ac63bad1d8d179f05e04c5057b944"
+      },
+      {
+        "path": "main.go",
+        "sha256": "88575351363dbc67c660fd94290d9f61d0a76af1330f40f3a39471d257f8ef55"
+      },
+      {
+        "path": "probe-routing.go",
+        "sha256": "262731855f67380e91ed289f6673eb2c687b17abb033a6b16ad54816650c106e"
+      },
+      {
+        "path": "probe.go",
+        "sha256": "f2d51f7e9e9b3e622e45e72930aa7b9b927a7f5fb2b8faa3051eb45fbcc5b0a7"
+      },
+      {
+        "path": "probe_icmp_unix.go",
+        "sha256": "5ab7d61193232aec85e29af6b33f5c01dc44bd04300f778a8379fa0ed3f48f2e"
+      },
+      {
+        "path": "probe_icmp_unsupported.go",
+        "sha256": "f78a38967bb336446f13c0051ed2a25bf0bd5d657d93b03b7bfb3b01552e4498"
+      },
+      {
+        "path": "routing_options.go",
+        "sha256": "6ac86ab9521abbc4585398d452ad5022e29b4084837f6a034447d4ca1ae9b96f"
+      },
+      {
+        "path": "socket-routing_linux.go",
+        "sha256": "dda5c05601a81857eca93d7cdbf8663c061e88ea9ab5340148797b1d32fdde27"
+      },
+      {
+        "path": "socket-routing_other.go",
+        "sha256": "3fba8ddfbffdd5acfed3922e845fe9b0b25b58f8572b65e917fc65c1886dddb4"
+      },
+      {
+        "path": "static/echarts.min.js",
+        "sha256": "873a889da5ecf780d88ce440cebcc75b57ef405b2cf08f78f43554f864b1b2bd"
+      },
+      {
+        "path": "static/index.html",
+        "sha256": "1bc3ddcb5c59ba8eec28a8dc0686b897b6e3b5d9eb17d2ba47fc75aab07a9579"
+      },
+      {
+        "path": "static/login.html",
+        "sha256": "2b10975d397eae75d615d5f65bdb462d728fff0662fb4d94bdca067dd31ca528"
+      },
+      {
+        "path": "static/routing.js",
+        "sha256": "b3fe0277c06c5af24b0c618befc86c597fb6f3c7f9bf96943b852d3cbaf6f6e1"
+      },
+      {
+        "path": "store.go",
+        "sha256": "1475704670e4d4ea83c86dabcf53bdc95bde73e80e5f8e4d992ff89349b68041"
+      },
+      {
+        "path": "web.go",
+        "sha256": "ffa24ac18dec31cc812d4455d39c6d2262a72e775bead3c7c7a04fdaf813128f"
+      }
+    ]
+  },
+  "build": {
+    "command": "../toolchains/go/bin/go.exe build -ldflags \"-X main.version=3.3.1-preview\" -o <scratch>/vrf-ping-native-screenshot.exe .",
+    "args": [
+      "build",
+      "-ldflags",
+      "-X main.version=3.3.1-preview",
+      "-o",
+      "<scratch>/vrf-ping-native-screenshot.exe",
+      "."
+    ],
+    "goVersion": "go version go1.22.12 windows/amd64",
+    "binarySha256": "02d71e3e3fa0f28129becce6170ea3697a0347b1841d3427608688ef3f8ac4b3",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "image": {
+    "path": "docs/images/vrf-ping-graph.png",
+    "sha256": "416ef1d36952b7b81eb7de4b7e572bda79939b60c6c782f09bb1c184007a472a",
+    "width": 1440,
+    "height": 1000,
+    "fullPage": false,
+    "deviceScaleFactor": 1
+  },
+  "fixture": {
+    "startedAt": "2026-11-04T15:12:44.074Z",
+    "elapsedSeconds": 48.515,
+    "icmpTargets": [],
+    "tcpTargets": [
+      "127.0.0.1:60470 Loopback lab TCP interval=1 source=127.0.0.1"
+    ],
+    "listener": "Node TCP listener owned by this capture; accepts and closes real loopback connections",
+    "sourceAddress": "127.0.0.1",
+    "vrf": null,
+    "intervalSeconds": 1,
+    "history": "Fresh scratch directory; only executable-generated measurements; no replay, seeding, or timestamp modification",
+    "authentication": "No credentials; HTTP bound exclusively to IPv4 loopback",
+    "externalProbes": false
+  },
+  "measurements": {
+    "rounds": 30,
+    "sent": 600,
+    "received": 600,
+    "latencySamples": 600,
+    "firstTimestamp": 1793805164,
+    "lastTimestamp": 1793805208,
+    "seriesSha256": "6cfad4c8489ddca436555634b50b15373fd6d3fb79c15aff40111f2deafdf536"
+  },
+  "browser": {
+    "channel": "msedge",
+    "version": "156.0.4314.58",
+    "timezone": "UTC",
+    "thirdPartyRequestsBlocked": true,
+    "blockedOrigins": [],
+    "javascriptErrors": [],
+    "interaction": [
+      "Filled native custom date inputs and clicked Go",
+      "Expanded native Probe routing disclosure"
+    ],
+    "domRetouching": false,
+    "mockedResponses": false
+  }
+}

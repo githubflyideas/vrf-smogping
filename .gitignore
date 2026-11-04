@@ -1,0 +1,12 @@
+node_modules/
+*.test
+*.exe
+/data/
+/targets/ping.list
+/targets/tcp.list
+/targets/routing-options.json
+
+/dist/
+/vrf-ping
+/json-ping
+/pingping

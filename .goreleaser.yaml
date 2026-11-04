@@ -1,0 +1,44 @@
+# GoReleaser — cross-platform tarballs. No apt/deb, no rpm, no brew tap (dropped:
+# not worth the token upkeep for a secondary channel — scp-and-run is the primary path).
+# Zero-dependency single binary.
+version: 2
+
+project_name: vrf-ping
+
+before:
+  hooks:
+    - go test ./...
+
+builds:
+  - id: vrf-ping
+    main: .
+    binary: vrf-ping
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+
+# Tarballs for the "scp and run" crowd: the binary plus LICENSE.
+archives:
+  - id: tar
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - LICENSE
+
+checksum:
+  name_template: "SHA256SUMS"
+
+
+release:
+  github:
+    owner: githubflyideas
+    name: vrf-ping
+  header: |
+    ## Install
+
+    scp a tarball below, extract, `./vrf-ping`. Zero dependencies.

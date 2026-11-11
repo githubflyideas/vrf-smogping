@@ -74,7 +74,7 @@ clearing both fields back to automatic routing.
 
 ## Published-package acceptance
 
-After publishing, dispatch the `test` workflow with `release_tag=v3.3.1` (or the
+After publishing, dispatch the `test` workflow with `release_tag=v3.3.2` (or the
 version under test). It checks out the tag, downloads the actual Linux amd64
 release archive and `SHA256SUMS`, verifies the checksum and embedded version,
 and runs the browser/backend tests against the extracted binary. It does not

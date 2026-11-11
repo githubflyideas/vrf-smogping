@@ -66,6 +66,11 @@ jobs:
             cp dist/vrf-ping-linux-amd64.tar.gz dist/SHA256SUMS "$RUNNER_TEMP/"
           fi
           (cd "$RUNNER_TEMP" && sha256sum --ignore-missing -c SHA256SUMS)
+          # Every member must be owned by root (0/0), never the runner's uid 1001.
+          if tar -tvzf "$RUNNER_TEMP/$binary_name-linux-amd64.tar.gz" --numeric-owner | awk '$2 != "0/0"' | grep .; then
+            if [ -z "$RELEASE_TAG" ]; then echo "::error::archive members not owned by 0/0"; exit 1; fi
+            echo "::warning::published archive members not owned by 0/0"
+          fi
           tar -xzf "$RUNNER_TEMP/$binary_name-linux-amd64.tar.gz" -C "$RUNNER_TEMP"
           if [ -n "$RELEASE_TAG" ]; then
             test "$("$RUNNER_TEMP/$binary_name" --version)" = "$binary_name ${RELEASE_TAG#v}"

@@ -27,8 +27,17 @@ archives:
   - id: tar
     formats: [tar.gz]
     name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    # Owner root (uid/gid 0) instead of the CI runner's 1001, so `tar -x` run as
+    # root does not hand the files to whatever local account has uid 1001, and
+    # does not fail on chown inside a container or user namespace.
+    builds_info:
+      owner: root
+      group: root
     files:
-      - LICENSE
+      - src: LICENSE
+        info:
+          owner: root
+          group: root
 
 checksum:
   name_template: "SHA256SUMS"

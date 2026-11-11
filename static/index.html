@@ -141,6 +141,10 @@
   #routingEditor input { max-width:100%; padding:7px; background:var(--screen); color:var(--ink); border:1px solid var(--line); border-radius:4px; font:inherit; }
   #routingEditor button:disabled { opacity:.5; cursor:default; }
   .led.error { background:var(--amber); box-shadow:none; border-radius:0; }
+  #cfgHealth { border-color:var(--alert); margin-bottom:14px; color:var(--ink); }
+  #cfgHealth b { color:var(--alert); }
+  #cfgHealth ul { margin:6px 0 0; padding-left:18px; font-family:var(--mono); font-size:var(--fs-small); }
+  #cfgHealth p { margin:6px 0 0; color:var(--dim); font-size:var(--fs-small); }
 </style>
 </head>
 <body>
@@ -149,6 +153,8 @@
   <div class="tag">One binary. One graph. One metric: Latency.</div>
   <button class="pill" id="themeBtn" title="switch theme" style="margin-left:auto">◐ <span id="themeName">dark</span></button>
 </header>
+
+<div id="cfgHealth" class="scope" role="alert" hidden></div>
 
 <div class="row">
   <div class="rng" id="tfilter" style="display:none">
@@ -449,6 +455,33 @@ document.querySelectorAll('#tfilter button').forEach(b => b.onclick = () => {
   typeFilter = b.dataset.t;
   render();
 });
+
+// Target-list problems the server would otherwise only log: lines skipped at
+// startup, and a reload that is being refused (which also refuses every other
+// edit to the lists until the bad line is fixed).
+async function loadHealth() {
+  let h;
+  try { h = await api('/api/health'); } catch (e) { return; }
+  const box = $('cfgHealth');
+  box.replaceChildren();
+  if (!h || h.ok) { box.hidden = true; return; }
+  const add = (tag, text) => { const el = document.createElement(tag); el.textContent = text; box.appendChild(el); return el; };
+  if (h.reload_error) {
+    const since = h.reload_error_since ? new Date(h.reload_error_since * 1000).toLocaleString() : '';
+    add('b', 'Target lists not applied' + (since ? ' since ' + since : ''));
+    add('ul', '').appendChild(document.createElement('li')).textContent = h.reload_error;
+    add('p', 'Still probing the last list that loaded. No edit to the lists takes effect until this line is fixed.');
+  }
+  if (h.skipped_at_startup && h.skipped_at_startup.length) {
+    add('b', `${h.skipped_at_startup.length} target line(s) skipped at startup`);
+    const ul = add('ul', '');
+    h.skipped_at_startup.forEach(m => { ul.appendChild(document.createElement('li')).textContent = m; });
+    add('p', 'These targets are not being probed. Fix the lines and they start within a few seconds, no restart needed.');
+  }
+  box.hidden = false;
+}
+loadHealth();
+setInterval(loadHealth, 10000);
 
 // 分享的是公开项目主页,不是本地私有面板
 fetch('/api/version').then(r => r.json()).then(d => {

@@ -281,15 +281,18 @@ func reloadLoop(cfg *Config, store *Store, det *Detector, mgr map[string]chan st
 			}
 			if err != nil {
 				// Keep the last successful stamp so transient failures retry even
-				// without another edit. Log a persistent failure only once.
+				// without another edit. Log a persistent failure only once; the
+				// web UI shows it for as long as it lasts (GET /api/health).
 				if message := err.Error(); message != lastError {
 					log.Printf("target reload failed (keeping current set): %v", err)
 					lastError = message
 				}
+				cfg.Health.reloadFailed(err, time.Now())
 				continue
 			}
 			last = s
 			lastError = ""
+			cfg.Health.reloadOK()
 		} else {
 			lastError = ""
 		}

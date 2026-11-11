@@ -18,6 +18,15 @@ import (
 //go:embed static
 var staticFS embed.FS
 
+// sessionCookie is vrf-ping's own name. It used to be "pingping_session", which a
+// pingping console on the same host (cookies ignore the port) would overwrite,
+// signing the operator out of one whenever they signed in to the other.
+const sessionCookie = "vrfping_session"
+
+// loginFailDelay is paid by every wrong password before the answer goes out.
+// Tests shorten it.
+var loginFailDelay = time.Second
+
 // sessionTTL is an absolute lifetime: a login is good for two hours from the moment
 // it was issued, whether or not the page keeps refreshing.
 const sessionTTL = 7200 * time.Second
@@ -102,6 +111,7 @@ func serveWeb(cfg *Config, store *Store, users map[string]string) error {
 
 func newMux(cfg *Config, store *Store, users map[string]string) http.Handler {
 	sess := newSessions()
+	throttle := newLoginThrottle()
 	limit := limiter(maxInflight, queueWait)
 	mux := http.NewServeMux()
 
@@ -109,7 +119,7 @@ func newMux(cfg *Config, store *Store, users map[string]string) http.Handler {
 		if len(users) == 0 {
 			return true
 		}
-		c, err := r.Cookie("pingping_session")
+		c, err := r.Cookie(sessionCookie)
 		return err == nil && sess.valid(c.Value)
 	}
 	guard := func(h http.HandlerFunc) http.HandlerFunc {
@@ -128,12 +138,15 @@ func newMux(cfg *Config, store *Store, users map[string]string) http.Handler {
 		}
 	}
 	page := func(name string) http.HandlerFunc {
+		b, _ := staticFS.ReadFile("static/" + name)
+		csp := pageCSP(b)
 		return func(w http.ResponseWriter, r *http.Request) {
-			b, _ := staticFS.ReadFile("static/" + name)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Content-Security-Policy", csp)
 			w.Write(b)
 		}
 	}
+	index := page("index.html")
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -144,42 +157,63 @@ func newMux(cfg *Config, store *Store, users map[string]string) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		page("index.html")(w, r)
+		index(w, r)
 	})
 	mux.HandleFunc("/login", page("login.html"))
 	mux.Handle("/static/", http.FileServer(http.FS(staticFS)))
 
-	// login: constant-time compare, 1s delay on failure to make brute force boring
+	// login: constant-time compare, 1s delay on failure, and a per-address lockout
+	// after repeated failures (see loginthrottle.go).
 	mux.HandleFunc("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "POST only", http.StatusMethodNotAllowed)
 			return
 		}
+		key := loginClientKey(r)
+		if wait, ok := throttle.begin(key); !ok {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.Header().Set("Retry-After", retryAfter(wait))
+			w.WriteHeader(http.StatusTooManyRequests)
+			json.NewEncoder(w).Encode(map[string]string{"error": "too many failed logins, try again later"})
+			return
+		}
 		var body struct{ User, Pass string }
-		json.NewDecoder(r.Body).Decode(&body)
+		json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10)).Decode(&body)
 		want, ok := users[body.User]
 		if len(users) == 0 || !ok ||
 			subtle.ConstantTimeCompare([]byte(body.Pass), []byte(want)) != 1 {
-			time.Sleep(time.Second)
-			log.Printf("web login failed from %s", r.RemoteAddr)
+			time.Sleep(loginFailDelay)
+			if lock := throttle.fail(key); lock > 0 {
+				log.Printf("web login failed from %s; address locked for %v", r.RemoteAddr, lock)
+			} else {
+				log.Printf("web login failed from %s", r.RemoteAddr)
+			}
 			http.Error(w, `{"error":"auth"}`, http.StatusUnauthorized)
 			return
 		}
-		http.SetCookie(w, &http.Cookie{Name: "pingping_session", Value: sess.issue(),
+		throttle.success(key)
+		http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: sess.issue(),
 			Path: "/", HttpOnly: true, MaxAge: int(sessionTTL.Seconds()), SameSite: http.SameSiteLaxMode})
 		writeJSON(w, map[string]bool{"ok": true})
 	})
 	mux.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
-		if c, err := r.Cookie("pingping_session"); err == nil {
+		if c, err := r.Cookie(sessionCookie); err == nil {
 			sess.revoke(c.Value) // otherwise the token stays valid until it expires
 		}
-		http.SetCookie(w, &http.Cookie{Name: "pingping_session", Value: "", Path: "/", MaxAge: -1})
+		http.SetCookie(w, &http.Cookie{Name: sessionCookie, Value: "", Path: "/", MaxAge: -1})
 		writeJSON(w, map[string]bool{"ok": true})
 	})
 
 	mux.HandleFunc("/api/version", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]string{"version": version})
 	})
+
+	// health: whether the target lists are applied in full. Same gate as the data:
+	// the messages quote list lines, which name the hosts this machine watches.
+	mux.HandleFunc("/api/health", guard(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		writeJSON(w, cfg.Health.report())
+	}))
 
 	mux.HandleFunc("/api/routing-options", guard(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
@@ -349,7 +383,7 @@ func newMux(cfg *Config, store *Store, users map[string]string) http.Handler {
 		writeJSON(w, store.ReadRange(r.Context(), name, from, to))
 	}))
 
-	return mux
+	return securityHeaders(mux)
 }
 
 func targetAddr(t TargetCfg) string {

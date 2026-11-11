@@ -30,6 +30,8 @@ Build from source: `go build -o vrf-ping .`. Run the binary directly on the host
 
 Paths are relative to the working directory. Changes reload automatically, normally within three seconds.
 
+A line that does not parse never takes the service down. At startup it is skipped, logged as a `WARNING` and shown in the web UI; the other targets start. While running, a list with a bad line is refused as a whole and the last good set keeps probing — so no other edit to the lists applies either until the line is fixed. The web UI shows that refusal (and `GET /api/health` reports it) for as long as it lasts.
+
 **`targets/ping.list`**
 
 ```text
@@ -58,6 +60,8 @@ Format: `target[:port] name [vrf=NAME] [source=LOCAL_IP]`.
 ```
 
 Use `--localhost` for loopback-only access; `--help` lists options. Restrict access to trusted management networks.
+
+After 5 wrong passwords from one client address, that address is locked out for 30 s, doubling per further miss up to 15 min; even the right password is refused (HTTP 429) until the lock runs out. The session cookie is `vrfping_session` (it was `pingping_session`, which clashed with a pingping console on the same host); signing in again after the upgrade is expected.
 
 Authenticated users can edit an existing target under **Probe routing**. Web writes are disabled when login is not configured.
 

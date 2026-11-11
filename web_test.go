@@ -84,7 +84,7 @@ func TestAuthFlow(t *testing.T) {
 	}
 	var c *http.Cookie
 	for _, x := range res.Cookies() {
-		if x.Name == "pingping_session" {
+		if x.Name == sessionCookie {
 			c = x
 		}
 	}

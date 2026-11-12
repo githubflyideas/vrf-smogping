@@ -79,7 +79,7 @@ func TestEmbeddedWebBranding(t *testing.T) {
 	}{
 		{"/", []string{
 			"<title>vrf-ping — link quality oscilloscope</title>",
-			`<div class="mark">vrf-ping `,
+			`<h1 class="mark">vrf-ping `,
 			"LIKE VRF-PING?",
 			"vrf-ping — a single-binary link quality oscilloscope.",
 			"vrf-ping — modern SmokePing alternative",
@@ -89,7 +89,7 @@ func TestEmbeddedWebBranding(t *testing.T) {
 		}},
 		{"/login", []string{
 			"<title>Sign in — vrf-ping</title>",
-			`<div class="mark">vrf-ping ●</div>`,
+			`<h1 class="mark">vrf-ping <span aria-hidden="true">●</span></h1>`,
 			"Sign in to vrf-ping",
 		}},
 	} {

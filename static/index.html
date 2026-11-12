@@ -9,8 +9,8 @@
     /* Terminal — a trading-desk screen at 2am. Amber trace (the classic financial-
      terminal color) over a slate-blue cloud that sinks to navy at the edges. */
   :root {
-    --bg:#0e1013; --panel:#171a1f; --screen:#0a0c0e; --line:#2a2f37;
-    --phos:#f0a838; --amber:#e8c468; --alert:#ef4a5a; --ink:#c4cad2; --dim:#747f8a;
+    --bg:#0e1013; --panel:#171a1f; --screen:#0a0c0e; --line:#2a2f37; --ctl:#636870;
+    --phos:#f0a838; --amber:#e8c468; --alert:#ef4a5a; --ink:#c4cad2; --dim:#7a858f;
     --grid-axis:#323944; --grid-split:#181c22;
     --smoke:rgba(90,140,200,.20); --lossbar:rgba(239,74,90,.65); --glow:5;
     --smoke-hot:#3a5a86; --smoke-mid:#2a4166; --smoke-cool:#182838;
@@ -25,8 +25,8 @@
   /* Newsprint — a broadsheet market page. Near-black ink trace, cloud runs from
      saturated brick to the warm grey of old halftone printing. */
   html[data-theme="newsprint"] {
-    --bg:#efe9dc; --panel:#f8f4ea; --screen:#fdfbf5; --line:#d8cfb8;
-    --phos:#1a1a18; --amber:#9c3b2e; --alert:#b8241f; --ink:#3d3a33; --dim:#8c8672;
+    --bg:#efe9dc; --panel:#f8f4ea; --screen:#fdfbf5; --line:#d8cfb8; --ctl:#898374;
+    --phos:#1a1a18; --amber:#973a2d; --alert:#b8241f; --ink:#3d3a33; --dim:#6c6858;
     --grid-axis:#c9bfa4; --grid-split:#e5ddc9;
     --smoke:rgba(156,59,46,.22); --lossbar:rgba(184,36,31,.55); --glow:0;
     --smoke-hot:#c85a3e; --smoke-mid:#d69878; --smoke-cool:#ddd0bc;
@@ -36,8 +36,8 @@
   /* Ukiyo — Hokusai's indigo woodblock prints. Deep aizuri trace on washi paper,
      the cloud runs from Prussian blue to a pale moss highlight. */
   html[data-theme="ukiyo"] {
-    --bg:#eef0e6; --panel:#f7f8f0; --screen:#fdfdf7; --line:#d4d8c4;
-    --phos:#1b3a6b; --amber:#c17817; --alert:#c1362f; --ink:#324158; --dim:#8593a0;
+    --bg:#eef0e6; --panel:#f7f8f0; --screen:#fdfdf7; --line:#d4d8c4; --ctl:#80898c;
+    --phos:#1b3a6b; --amber:#825110; --alert:#c1362f; --ink:#324158; --dim:#5f6d7a;
     --grid-axis:#c3cab0; --grid-split:#e2e4d4;
     --smoke:rgba(27,58,107,.22); --lossbar:rgba(193,54,47,.5); --glow:0;
     --smoke-hot:#4a76ae; --smoke-mid:#88a8cc; --smoke-cool:#d4dcc4;
@@ -47,8 +47,8 @@
   /* Memphis — Ettore Sottsass's 1980s Milan collective. Coral trace with real
      confidence against soft lavender-grey, teal cloud instead of the expected pink. */
   html[data-theme="memphis"] {
-    --bg:#e8e4ec; --panel:#f5f2f8; --screen:#fbf9fc; --line:#d2c8dc;
-    --phos:#e3462f; --amber:#0e9488; --alert:#c1362f; --ink:#463b4f; --dim:#8f849a;
+    --bg:#e8e4ec; --panel:#f5f2f8; --screen:#fbf9fc; --line:#d2c8dc; --ctl:#887d91;
+    --phos:#bf2f1a; --amber:#096159; --alert:#ba342d; --ink:#463b4f; --dim:#6c6177;
     --grid-axis:#c9bcd4; --grid-split:#e9e2ee;
     --smoke:rgba(14,148,136,.24); --lossbar:rgba(193,54,47,.5); --glow:0;
     --smoke-hot:#054841; --smoke-mid:#1fa89a; --smoke-cool:#c4e2da;
@@ -58,8 +58,8 @@
   /* Phosphor — classic P1 green CRT, the mirror image of an amber tube: green
      trace, the cloud a warm amber-to-rust decay instead of the usual green fade. */
   html[data-theme="phosphor"] {
-    --bg:#0a0f0a; --panel:#131a12; --screen:#070b06; --line:#233024;
-    --phos:#5eeb8a; --amber:#8ff0ab; --alert:#ff5f4a; --ink:#b8ceb8; --dim:#6f8570;
+    --bg:#0a0f0a; --panel:#131a12; --screen:#070b06; --line:#233024; --ctl:#5c6c5c;
+    --phos:#5eeb8a; --amber:#8ff0ab; --alert:#ff5f4a; --ink:#b8ceb8; --dim:#718872;
     --grid-axis:#2c3c2c; --grid-split:#141c14;
     --smoke:rgba(230,150,50,.20); --lossbar:rgba(255,95,74,.6); --glow:6;
     --smoke-hot:#c47a20; --smoke-mid:#8a5010; --smoke-cool:#3a2c10;
@@ -138,24 +138,43 @@
   .share-links { display:flex; gap:12px; }
   .share-links a { color:var(--dim); font-weight:500; }
 #routingEditor summary { cursor:pointer; }
-  #routingEditor input { max-width:100%; padding:7px; background:var(--screen); color:var(--ink); border:1px solid var(--line); border-radius:4px; font:inherit; }
+  #routingEditor input { max-width:100%; padding:7px; background:var(--screen); color:var(--ink); border:1px solid var(--ctl); border-radius:4px; font:inherit; }
   #routingEditor button:disabled { opacity:.5; cursor:default; }
   .led.error { background:var(--amber); box-shadow:none; border-radius:0; }
   #cfgHealth { border-color:var(--alert); margin-bottom:14px; color:var(--ink); }
   #cfgHealth b { color:var(--alert); }
   #cfgHealth ul { margin:6px 0 0; padding-left:18px; font-family:var(--mono); font-size:var(--fs-small); }
   #cfgHealth p { margin:6px 0 0; color:var(--dim); font-size:var(--fs-small); }
+  /* Accessibility. --ctl is the border of a form control: --line is a hairline
+     between panels (decoration), but a text field is only recognisable by its edge,
+     which WCAG 1.4.11 wants at 3:1. Focus rings use the accent for the same reason. */
+  :focus-visible { outline:2px solid var(--phos); outline-offset:2px; }
+  .skip { position:absolute; left:12px; top:-60px; z-index:20; background:var(--panel); color:var(--phos);
+          border:2px solid var(--phos); border-radius:6px; padding:8px 14px; font-weight:600; text-decoration:none; }
+  .skip:focus { top:12px; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+             clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  h1.mark { margin:0; }
+  #main:focus { outline:none; }
+  .rng { flex-wrap:wrap; max-width:100%; }
+  .rng.custom { border-color:var(--ctl); }
+  .rng.custom input { min-width:0; max-width:100%; }
+  .promo-b a, .share a, .share-links a { display:inline-flex; align-items:center; min-height:24px; min-width:24px; justify-content:center; }
+  .share .promo-b, .share-links { flex-wrap:wrap; }
+  #routingEditor summary { min-height:24px; display:list-item; }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to chart</a>
 <header>
-  <div class="mark">vrf-ping <span class="brand-led"></span></div>
+  <h1 class="mark">vrf-ping <span class="brand-led" aria-hidden="true"></span></h1>
   <div class="tag">One binary. One graph. One metric: Latency.</div>
   <button class="pill" id="themeBtn" title="switch theme" style="margin-left:auto">◐ <span id="themeName">dark</span></button>
 </header>
 
 <div id="cfgHealth" class="scope" role="alert" hidden></div>
 
+<main id="main" tabindex="-1">
 <div class="row">
   <div class="rng" id="tfilter" style="display:none">
     <button data-t="all" class="on">All</button>
@@ -178,8 +197,15 @@
   </form>
 </details>
 
-<div class="scope">
-  <div class="crt"><div id="chart"></div></div>
+<section class="scope" aria-labelledby="chartTitle">
+  <h2 class="sr-only" id="chartTitle">Latency and packet loss</h2>
+  <div class="crt"><div id="chart" role="img" aria-label="Latency and packet-loss chart" aria-describedby="chartSum"></div></div>
+  <div class="sr-only" id="chartText">
+    <p id="chartSum"></p>
+    <table><caption>Chart data, oldest first</caption>
+      <thead><tr><th scope="col">Time</th><th scope="col">Median RTT (ms)</th><th scope="col">Worst loss (%)</th><th scope="col">Bursts</th></tr></thead>
+      <tbody id="chartRows"></tbody></table>
+  </div>
   <div class="readouts">
     <div class="ro"><div class="v" id="p50">–</div><div class="l">P50 MS</div></div>
     <div class="ro"><div class="v" id="p90">–</div><div class="l">P90 MS</div></div>
@@ -199,13 +225,16 @@
       <button data-m="432000">300d</button>
     </div>
     <div class="rng custom">
+      <label class="sr-only" for="customFrom">From</label>
       <input type="datetime-local" id="customFrom" step="60">
-      <span class="sep">→</span>
+      <span class="sep" aria-hidden="true">→</span>
+      <label class="sr-only" for="customTo">To</label>
       <input type="datetime-local" id="customTo" step="60">
       <button id="customGo">Go</button>
     </div>
   </div>
-</div>
+</section>
+</main>
 
 <footer>
   <span id="conclusion"></span>
@@ -282,6 +311,30 @@ async function loadTargets() {
 }
 
 let sel = null; // {from,to} 自定义查询区间(unix 秒)
+// Text alternative for the canvas (WCAG 1.1.1): the window in one sentence, and the
+// history in at most 12 equal slices, so the shape of the curve is not visual-only.
+function describeChart(t, winLabel, info, st) {
+  const ts = Object.keys(info).map(Number).sort((a, b) => a - b);
+  const medOf = k => info[k].n ? info[k].med : undefined;
+  const meds = ts.map(medOf).filter(v => v !== undefined);
+  let sum = `${t.name}${t.error ? ' (probe error)' : t.down ? ' (down)' : ''}, ${winLabel}: P50 ${st.p50} ms, P90 ${st.p90} ms, P99 ${st.p99} ms, loss ${st.loss}%, ${st.bursts} bursts.`;
+  if (meds.length) sum += ` Median RTT ranged from ${Math.min(...meds).toFixed(1)} to ${Math.max(...meds).toFixed(1)} ms over ${ts.length} rounds.`;
+  else sum += ' No replies in this window.';
+  $('chartSum').textContent = sum;
+  const rows = $('chartRows'); rows.replaceChildren();
+  const n = Math.min(12, ts.length), when = ms => new Date(ms).toLocaleString([], { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  for (let i = 0; i < n; i++) {
+    const part = ts.slice(Math.floor(i * ts.length / n), Math.floor((i + 1) * ts.length / n));
+    if (!part.length) continue;
+    const m = part.map(medOf).filter(v => v !== undefined).sort((a, b) => a - b);
+    const loss = Math.max(...part.map(k => info[k].lp || 0));
+    const b = part.reduce((a, k) => a + (info[k].b ? 1 : 0), 0);
+    const tr = document.createElement('tr');
+    [`${when(part[0])} – ${when(part[part.length - 1])}`, m.length ? m[Math.floor(m.length / 2)].toFixed(1) : '–', loss.toFixed(1), String(b)]
+      .forEach((v, j) => { const c = document.createElement(j ? 'td' : 'th'); if (!j) c.scope = 'row'; c.textContent = v; tr.append(c); });
+    rows.append(tr);
+  }
+}
 let renderSeq = 0;
 let inflight = null; // 正在飞的 series 请求 —— 新请求发起前先掐掉它,
                      // 否则快速点击会在服务端堆起一串没人要的慢查询,互相拖死。
@@ -365,11 +418,13 @@ async function renderInner(seq) {
     : minutes === 60 ? '1h' : minutes === 360 ? '6h' : minutes === 720 ? '12h'
     : minutes === 1440 ? '24h' : minutes === 10080 ? '7d' : minutes === 43200 ? '30d' : minutes + 'm';
   $('conclusion').textContent = (t.error ? `⚠ Probe error: ${t.error} · ` : t.down ? '🔴 ' : '🟢 ') + `${t.name}: ${win} P99 ${pool.length ? q(.99).toFixed(1) : '–'} ms · loss ${lossPct.toFixed(2)}% · ${bursts} bursts`;
+  const f1 = v => pool.length ? v.toFixed(1) : '–';
+  describeChart(t, win, roundInfo, { p50: f1(q(.5)), p90: f1(q(.9)), p99: f1(q(.99)), loss: lossPct.toFixed(2), bursts });
 
   const phos = cssv('--phos');
   chart.setOption({
     animation: false,
-    grid: { left: 52, right: 46, top: 18, bottom: 42 },
+    grid: { left: 52, right: 46, top: 28, bottom: 42 },
     xAxis: { type: 'time', axisLine: { lineStyle: { color: cssv('--grid-axis') } },
              axisLabel: { color: cssv('--dim'), fontSize: 10,
                formatter: v => {
@@ -390,7 +445,9 @@ async function renderInner(seq) {
     yAxis: [
       { type: 'value', name: 'RTT ms', nameTextStyle: { color: cssv('--dim'), fontSize: 10 },
         axisLabel: { color: cssv('--dim'), fontSize: 10 }, splitLine: { lineStyle: { color: cssv('--grid-split') } } },
-      { type: 'value', max: 100, show: false }
+      // Loss has its own labelled axis, so the bars do not rely on colour alone.
+      { type: 'value', max: 100, name: 'loss %', nameTextStyle: { color: cssv('--dim'), fontSize: 10 },
+        axisLabel: { color: cssv('--dim'), fontSize: 10 }, splitLine: { show: false } }
     ],
     tooltip: { trigger: 'axis',
       backgroundColor: cssv('--panel'), borderColor: cssv('--line'),

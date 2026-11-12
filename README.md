@@ -17,8 +17,8 @@ Linux amd64; other builds are available in [Releases](https://github.com/githubf
 
 ```bash
 set -e
-curl -fLO https://github.com/githubflyideas/vrf-smogping/releases/download/v3.3.3/vrf-ping-linux-amd64.tar.gz
-curl -fLO https://github.com/githubflyideas/vrf-smogping/releases/download/v3.3.3/SHA256SUMS
+curl -fLO https://github.com/githubflyideas/vrf-smogping/releases/download/v3.3.4/vrf-ping-linux-amd64.tar.gz
+curl -fLO https://github.com/githubflyideas/vrf-smogping/releases/download/v3.3.4/SHA256SUMS
 sha256sum --ignore-missing -c SHA256SUMS
 tar -xzf vrf-ping-linux-amd64.tar.gz
 ./vrf-ping --listen 127.0.0.1:8517

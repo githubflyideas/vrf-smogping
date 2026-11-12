@@ -48,3 +48,16 @@ func TestReleaseArchiveOwnedByRoot(t *testing.T) {
 		}
 	}
 }
+
+// goreleaser must publish to the repository's real name: the old name only
+// redirects, and the upload API answers a redirect with 307 instead of storing
+// the asset.
+func TestReleasePublishesToRealRepository(t *testing.T) {
+	b, err := os.ReadFile(".goreleaser.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(b), "    owner: githubflyideas\n") || !strings.Contains(string(b), "    name: vrf-smogping\n") {
+		t.Error(".goreleaser.yaml release.github must be githubflyideas/vrf-smogping")
+	}
+}

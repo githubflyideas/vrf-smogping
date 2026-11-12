@@ -46,7 +46,10 @@ checksum:
 release:
   github:
     owner: githubflyideas
-    name: vrf-ping
+    # The repository's real name. github.com/githubflyideas/vrf-ping only
+    # redirects here, and the asset upload API does not follow redirects (307):
+    # v3.3.2's first run created the release and then failed every upload.
+    name: vrf-smogping
   header: |
     ## Install
 

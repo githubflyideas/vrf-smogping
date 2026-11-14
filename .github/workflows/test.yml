@@ -38,6 +38,8 @@ jobs:
         with: { node-version: '22', cache: npm }
       - run: npm ci --ignore-scripts
       - run: npx playwright install --with-deps chromium
+      # syft for the per-archive SBOMs (.goreleaser.yaml "sboms").
+      - uses: anchore/sbom-action/download-syft@v0
       - name: Build renamed distribution archives
         if: ${{ !inputs.release_tag }}
         uses: goreleaser/goreleaser-action@v6
